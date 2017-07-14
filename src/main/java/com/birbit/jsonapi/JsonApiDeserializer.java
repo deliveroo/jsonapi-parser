@@ -16,19 +16,30 @@
 
 package com.birbit.jsonapi;
 
-import com.google.gson.*;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class JsonApiDeserializer implements JsonDeserializer<JsonApiResponse> {
     Map<String, JsonApiResourceDeserializer<?>> deserializerMap;
     final Map<Class, String> typeMapping;
+
     public JsonApiDeserializer(JsonApiResourceDeserializer... deserializers) {
         deserializerMap = new HashMap<String, JsonApiResourceDeserializer<?>>((int) (deserializers.length * 1.25));
         typeMapping = new HashMap<Class, String>();
@@ -58,17 +69,19 @@ public class JsonApiDeserializer implements JsonDeserializer<JsonApiResponse> {
 
         JsonApiLinks links = parseLinks(context, jsonObject);
 
+        JsonApiMeta meta = parseMeta(context, jsonObject);
+
         Object data = parseData(context, parameterizedType, jsonObject);
         List<JsonApiError> errors = parserErrors(context, jsonObject);
         if ((data == null) == (errors == null)) {
             throw new JsonParseException("The JSON API response should have data or errors");
         }
         if (errors != null) {
-            return new JsonApiResponse(errors, typeMapping, links);
+            return new JsonApiResponse(errors, typeMapping, links, meta);
         }
         Map<String, Map<String, Object>> included = parseIncluded(context, jsonObject);
         //noinspection unchecked
-        return new JsonApiResponse(data, included, typeMapping, links);
+        return new JsonApiResponse(data, included, typeMapping, links, meta);
     }
 
     private List<JsonApiError> parserErrors(JsonDeserializationContext context, JsonObject jsonObject) {
@@ -93,6 +106,14 @@ public class JsonApiDeserializer implements JsonDeserializer<JsonApiResponse> {
         return context.deserialize(links, JsonApiLinks.class);
     }
 
+    private JsonApiMeta parseMeta(JsonDeserializationContext context, JsonObject jsonObject) {
+        JsonElement meta = jsonObject.get("meta");
+        if (meta == null || !meta.isJsonObject()) {
+            return JsonApiMeta.EMPTY;
+        }
+        return context.deserialize(meta, JsonApiMeta.class);
+    }
+
     private Map<String, Map<String, Object>> parseIncluded(JsonDeserializationContext context, JsonObject jsonObject) {
         JsonElement includedElm = jsonObject.get("included");
         Map<String, Map<String, Object>> included;
@@ -100,7 +121,7 @@ public class JsonApiDeserializer implements JsonDeserializer<JsonApiResponse> {
             included = new HashMap<String, Map<String, Object>>();
             JsonArray includedArray = includedElm.getAsJsonArray();
             final int size = includedArray.size();
-            for (int i = 0; i < size; i ++) {
+            for (int i = 0; i < size; i++) {
                 ResourceWithIdAndType parsed = parseResource(includedArray.get(i), context);
                 if (parsed.resource != null) {
                     Map<String, Object> itemMap = included.get(parsed.apiType);
@@ -128,14 +149,14 @@ public class JsonApiDeserializer implements JsonDeserializer<JsonApiResponse> {
                 if (isArray) {
                     TypeToken<?> typeToken = TypeToken.get(typeArg);
                     Object[] result = (Object[]) Array.newInstance(typeToken.getRawType().getComponentType(), size);
-                    for (int i = 0; i < size; i ++) {
+                    for (int i = 0; i < size; i++) {
                         ResourceWithIdAndType resourceWithIdAndType = parseResource(jsonArray.get(i), context);
                         result[i] = resourceWithIdAndType.resource;
                     }
                     return result;
                 } else {
                     List result = new ArrayList(size);
-                    for (int i = 0; i < size; i ++) {
+                    for (int i = 0; i < size; i++) {
                         ResourceWithIdAndType resourceWithIdAndType = parseResource(jsonArray.get(i), context);
                         //noinspection unchecked
                         result.add(resourceWithIdAndType.resource);
@@ -165,6 +186,7 @@ public class JsonApiDeserializer implements JsonDeserializer<JsonApiResponse> {
 
     public static GsonBuilder register(GsonBuilder builder, JsonApiResourceDeserializer... deserializers) {
         return builder.registerTypeAdapter(JsonApiResponse.class, new JsonApiDeserializer(deserializers))
+                .registerTypeAdapter(JsonApiMeta.class, JsonApiMetaDeserializer.INSTANCE)
                 .registerTypeAdapter(JsonApiLinks.class, JsonApiLinksDeserializer.INSTANCE);
     }
 

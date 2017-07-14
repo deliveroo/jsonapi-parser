@@ -20,6 +20,7 @@ import com.birbit.jsonapi.vo.Article;
 import com.birbit.jsonapi.vo.ArticleWithFullRelationships;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -27,8 +28,13 @@ import org.junit.runners.JUnit4;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static com.birbit.jsonapi.TestUtil.*;
-import static org.hamcrest.CoreMatchers.*;
+import static com.birbit.jsonapi.TestUtil.ARTICLE_DESERIALIZER;
+import static com.birbit.jsonapi.TestUtil.ARTICLE_WITH_RELATIONSHIP_OBJECTS_DESERIALIZER;
+import static com.birbit.jsonapi.TestUtil.AUTHOR_DESERIALIZER;
+import static com.birbit.jsonapi.TestUtil.COMMENT_DESERIALIZER;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(JUnit4.class)
@@ -37,7 +43,8 @@ public class BlogTest {
     public void blogWithRelationshipIdsTest() throws IOException {
         String json = TestUtil.readTestData("blog.json");
         Gson gson = TestUtil.createGson(AUTHOR_DESERIALIZER, ARTICLE_DESERIALIZER, COMMENT_DESERIALIZER);
-        JsonApiResponse<Article[]> response = gson.fromJson(json, new TypeToken<JsonApiResponse<Article[]>>(){}.getType());
+        JsonApiResponse<Article[]> response = gson.fromJson(json, new TypeToken<JsonApiResponse<Article[]>>() {
+        }.getType());
         Article[] articles = response.getData();
         assertThat(articles, notNullValue());
         assertThat(articles.length, is(1));
@@ -54,6 +61,12 @@ public class BlogTest {
         JsonApiLinks allLinks = first.getAllLinks();
         assertThat(allLinks.getUrl("self"), is("http://example.com/articles/1"));
 
+        // article meta
+        JsonApiMeta meta = response.getMeta();
+        assertThat(meta, is(notNullValue()));
+        assertThat((String) meta.get("time_zone_offset"), is("+0200"));
+        assertThat((String) meta.get("neighborhood_name"), is("Streatham Vale"));
+
         // response links
         JsonApiLinks links = response.getLinks();
         assertThat(links, is(notNullValue()));
@@ -68,7 +81,8 @@ public class BlogTest {
         String json = TestUtil.readTestData("blog.json");
         Gson gson = TestUtil.createGson(AUTHOR_DESERIALIZER, ARTICLE_WITH_RELATIONSHIP_OBJECTS_DESERIALIZER, COMMENT_DESERIALIZER);
         JsonApiResponse<ArticleWithFullRelationships[]> response
-                = gson.fromJson(json, new TypeToken<JsonApiResponse<ArticleWithFullRelationships[]>>(){}.getType());
+                = gson.fromJson(json, new TypeToken<JsonApiResponse<ArticleWithFullRelationships[]>>() {
+        }.getType());
         ArticleWithFullRelationships[] articles = response.getData();
         assertThat(articles, notNullValue());
         assertThat(articles.length, is(1));
@@ -96,6 +110,12 @@ public class BlogTest {
         // article links
         JsonApiLinks allLinks = first.getAllLinks();
         assertThat(allLinks.getUrl("self"), is("http://example.com/articles/1"));
+
+        // article meta
+        JsonApiMeta meta = response.getMeta();
+        assertThat(meta, is(notNullValue()));
+        assertThat((String) meta.get("time_zone_offset"), is("+0200"));
+        assertThat((String) meta.get("neighborhood_name"), is("Streatham Vale"));
 
         // response links
         JsonApiLinks links = response.getLinks();

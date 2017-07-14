@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "time_zone_offset": "+0200",
+    "neighborhood_name": "Streatham Vale"
+  },
   "links": {
     "self": "http://example.com/articles",
     "next": "http://example.com/articles?page[offset]=2",
