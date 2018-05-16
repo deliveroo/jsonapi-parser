@@ -63,7 +63,12 @@ public class JsonApiResponse<T> {
             return Collections.emptyMap();
         }
         //noinspection unchecked
-        return (Map<String, K>) included.get(mapping);
+        Map<String, K> includedMapping = (Map<String, K>) included.get(mapping);
+        if (includedMapping == null) {
+            return Collections.emptyMap();
+        } else {
+            return includedMapping;
+        }
     }
 
     public List<JsonApiError> getErrors() {
