@@ -7,7 +7,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +38,14 @@ public class JsonApiMetaDeserializer implements JsonDeserializer<JsonApiMeta> {
             JsonElement value = entry.getValue();
             if (value.isJsonPrimitive()) {
                 result.put(entry.getKey(), entry.getValue().getAsString());
+            } else if (value.isJsonArray()) {
+                List<String> allValues = new ArrayList<>();
+                for (JsonElement element : entry.getValue().getAsJsonArray()) {
+                    if (element.isJsonPrimitive()) {
+                        allValues.add(element.getAsJsonPrimitive().getAsString());
+                    }
+                }
+                result.put(entry.getKey(), allValues);
             }
         }
         return new JsonApiMeta(result);
