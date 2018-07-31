@@ -1,10 +1,11 @@
 package com.birbit.jsonapi;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Created by ana on 13/07/17.
@@ -16,11 +17,11 @@ public class JsonApiMeta {
 
     private Map<String, Object> meta;
 
-    public JsonApiMeta(@NonNull Map<String, Object> meta) {
+    public JsonApiMeta(@Nonnull Map<String, Object> meta) {
         this.meta = meta;
     }
 
-    @NonNull public Map<String, Object> getMeta() {
+    @Nonnull public Map<String, Object> getMeta() {
         return meta;
     }
 

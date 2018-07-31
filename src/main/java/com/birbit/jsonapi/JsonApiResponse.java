@@ -16,9 +16,8 @@
 
 package com.birbit.jsonapi;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +31,9 @@ public class JsonApiResponse<T> {
     private final JsonApiMeta meta;
     @Nullable private final List<JsonApiError> errors;
 
-    public JsonApiResponse(@Nullable T data, @NonNull Map<String, Map<String, ?>> included,
-                           @NonNull Map<Class, String> typeMapping, @NonNull JsonApiLinks links,
-                           @NonNull JsonApiMeta meta) {
+    public JsonApiResponse(@Nullable T data, @Nonnull Map<String, Map<String, ?>> included,
+                           @Nonnull Map<Class, String> typeMapping, @Nonnull JsonApiLinks links,
+                           @Nonnull JsonApiMeta meta) {
         this.data = data;
         this.errors = null;
         this.included = included;
@@ -43,8 +42,8 @@ public class JsonApiResponse<T> {
         this.meta = meta;
     }
 
-    public JsonApiResponse(List<JsonApiError> errors, @NonNull Map<Class, String> typeMapping,
-                           @NonNull JsonApiLinks links, @NonNull JsonApiMeta meta) {
+    public JsonApiResponse(List<JsonApiError> errors, @Nonnull Map<Class, String> typeMapping,
+                           @Nonnull JsonApiLinks links, @Nonnull JsonApiMeta meta) {
         this.data = null;
         this.included = Collections.emptyMap();
         this.errors = errors;
@@ -57,7 +56,7 @@ public class JsonApiResponse<T> {
         return data;
     }
 
-    @NonNull public <K> Map<String, K> getIncluded(Class<K> type) {
+    @Nonnull public <K> Map<String, K> getIncluded(Class<K> type) {
         String mapping = typeMapping.get(type);
         if (mapping == null) {
             return Collections.emptyMap();
@@ -79,15 +78,15 @@ public class JsonApiResponse<T> {
         return getIncluded(type).get(id);
     }
 
-    @NonNull public Map<String, Map<String, ?>> getIncluded() {
+    @Nonnull public Map<String, Map<String, ?>> getIncluded() {
         return included;
     }
 
-    @NonNull public JsonApiLinks getLinks() {
+    @Nonnull public JsonApiLinks getLinks() {
         return links;
     }
 
-    @NonNull public JsonApiMeta getMeta() {
+    @Nonnull public JsonApiMeta getMeta() {
         return meta;
     }
 }

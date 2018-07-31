@@ -16,12 +16,11 @@
 
 package com.birbit.jsonapi;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
-
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * A links object defined as in http://jsonapi.org/format/#document-links
@@ -31,11 +30,11 @@ public class JsonApiLinks {
 
     private Map<String, JsonApiLinkItem> links;
 
-    public JsonApiLinks(@NonNull Map<String, JsonApiLinkItem> links) {
+    public JsonApiLinks(@Nonnull Map<String, JsonApiLinkItem> links) {
         this.links = links;
     }
 
-    @NonNull
+    @Nonnull
     public Map<String, JsonApiLinkItem> getLinks() {
         return links;
     }
